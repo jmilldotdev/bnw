@@ -1,8 +1,8 @@
 # bnw-slop
 
-Seeded black/white geometric web art, now as a Vite + React app with hot reload.
+Seeded black/white geometric web art, now running on Next.js (App Router).
 
-## Dev (hot reload)
+## Dev
 
 ```bash
 cd /Users/jmill/projects/bnw-slop
@@ -10,45 +10,65 @@ npm install
 npm run dev
 ```
 
-Vite prints local and network URLs (configured on port `5175`), for example:
-- `http://localhost:5175/`
-- `http://192.168.0.117:5175/`
+Server runs on port `5175`.
 
-To run with query args in dev, open e.g.:
-
-`http://localhost:5175/?seed=42&speed=0.35&density=1.2&warp=1.4`
-
-## Build + preview
+## Build + run
 
 ```bash
 cd /Users/jmill/projects/bnw-slop
 npm run build
-npm run preview
+npm run start
 ```
 
 ## Query args
 
-- `seed` (`number`): deterministic motif seed that drives the full composition.
+- `seed` (`number`): deterministic motif seed.
 - `animate` (`0|1|true|false`, default `true`): continuous redraw.
 - `speed` (`0..4`): animation speed scalar.
 - `density` (`0.25..2.25`): stripe density.
 - `warp` (`0..4`): spatial distortion amount.
 - `spin` (`-2..2`): rotational drift for sphere mapping.
 - `grain` (`0..0.65`): procedural grain.
-- `hud` (`0|1|true|false`): debug overlay (toggle anytime with `h`).
+- `hud` (`0|1|true|false`): debug overlay (`h` toggles locally).
+- `appId` (`string`, default `bnw-slop`): remote controls app identity.
+- `ws` (`ws://` or `wss://` URL): control socket endpoint for live `control` messages.
 
-## Chiba URL media config example
+## App controls API
+
+`GET /api/app-controls`
+
+Returns a standard controls payload:
 
 ```json
 {
-  "args": {
-    "seed": { "mode": "int_range", "min": 1, "max": 999999, "perScreen": true },
-    "animate": 1,
-    "speed": 0.3,
-    "density": 1.1,
-    "warp": 1.3
+  "ok": true,
+  "appId": "bnw-slop",
+  "controls": [
+    { "id": "seed", "label": "Seed", "type": "range", "min": 1, "max": 999999, "step": 1, "value": 42 },
+    { "id": "randomize", "label": "Randomize", "type": "button" },
+    { "id": "animate", "label": "Animate", "type": "toggle", "value": true }
+  ]
+}
+```
+
+It accepts the same query args as the main app, so default control values match runtime launch args.
+
+## Chiba media config example
+
+```json
+{
+  "sourceType": "url",
+  "sourceValue": "https://bnw.example.com/?appId=bnw-slop&ws=wss%3A%2F%2Fcontrol.example.com%2Fws",
+  "web": {
+    "appControlsApi": "https://bnw.example.com/api/app-controls?appId=bnw-slop",
+    "args": {
+      "seed": { "mode": "int_range", "min": 1, "max": 999999, "perScreen": true },
+      "speed": 0.3,
+      "density": 1.1,
+      "warp": 1.3
+    }
   }
 }
 ```
 
-With this config, every node/screen gets a stable different `seed` while the rest of args stay fixed.
+When `appControlsApi` is configured, chiba can fetch controls via `/api/controls/:appId`.
