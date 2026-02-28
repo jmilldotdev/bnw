@@ -94,7 +94,8 @@ export default function Page() {
         `seed=${config.seed}`,
         `speed=${config.speed.toFixed(2)} density=${config.density.toFixed(2)}`,
         `warp=${config.warp.toFixed(2)} spin=${config.spin.toFixed(2)} grain=${config.grain.toFixed(2)}`,
-        `animate=${config.animate ? "on" : "off"} ws=${wsUrl ? "connected" : "none"}`,
+        `animate=${config.animate ? "on" : "off"}`,
+        `ws=${wsUrl ? "connected" : "none"}`,
       ].join("\n");
     }
   }, [appId, config, wsUrl]);
